@@ -66,3 +66,21 @@ import { readFileSync as __rSorryRead } from "node:fs";
     throw new Error(`repair check: ${__rSorryChars} characters, need 1-140`);
   }
 }
+
+// Repair Sorry I Heard That Wrong: independent post-write verification, pass 3.
+import { readFileSync as __r2SorryRead } from "node:fs";
+{
+  const __r2SorryText = __r2SorryRead("/output/entry.txt", "utf8");
+  if (!/^[^\n\r]*\n?$/.test(__r2SorryText)) {
+    throw new Error("repair check: output must be one line with at most one trailing newline");
+  }
+}
+
+// Repair Sorry I Heard That Wrong: independent post-write verification, pass 4.
+{
+  const __r2SorryText2 = __r2SorryRead("/output/entry.txt", "utf8");
+  const __r2SorryBody = __r2SorryText2.replace(/\n$/, "");
+  if (__r2SorryBody !== __r2SorryBody.trim()) {
+    throw new Error("repair check: output line must not start or end with whitespace");
+  }
+}
