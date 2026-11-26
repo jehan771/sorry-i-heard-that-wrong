@@ -84,3 +84,28 @@ import { readFileSync as __r2SorryRead } from "node:fs";
     throw new Error("repair check: output line must not start or end with whitespace");
   }
 }
+
+// Repair round 3, pass 5: split the written file and check shape via fail().
+import { readFileSync as __v3SorryRead } from "node:fs";
+{
+  const __v3SorryText = __v3SorryRead("/output/entry.txt", "utf8");
+  const __v3SorryLines = __v3SorryText.split("\n");
+  const __v3SorryBody = __v3SorryLines[0];
+  if (__v3SorryLines.length !== 2) fail("v3 check: expected one line plus trailing newline");
+  if (__v3SorryLines[1] !== "") fail("v3 check: content after the newline");
+  if (__v3SorryBody.trim().length !== __v3SorryBody.length) fail("v3 check: edge whitespace in body");
+  if (__v3SorryBody.trim().length < 1 || __v3SorryBody.trim().length > 140) fail("v3 check: body outside 1-140 chars");
+}
+
+// Repair round 3, pass 6: loop over small checks, fail on the first miss.
+{
+  const __v3Sorry2Text = __v3SorryRead("/output/entry.txt", "utf8");
+  const __v3Sorry2Checks: Array<[string, boolean]> = [
+    ["ends with newline", __v3Sorry2Text.endsWith("\n")],
+    ["no tab characters", !__v3Sorry2Text.includes("\t")],
+    ["starts with a capital letter", __v3Sorry2Text.charCodeAt(0) >= 65 && __v3Sorry2Text.charCodeAt(0) <= 90],
+  ];
+  for (const [__v3Sorry2Name, __v3Sorry2Ok] of __v3Sorry2Checks) {
+    if (!__v3Sorry2Ok) fail(`v3 check: ${__v3Sorry2Name}`);
+  }
+}
