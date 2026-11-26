@@ -43,3 +43,26 @@ if (Buffer.byteLength(back, "utf8") !== Buffer.byteLength(LINE + "\n", "utf8"))
   fail("read-back byte length mismatch");
 
 console.log(`wrote ${LINE.length} characters to ${OUT_PATH}`);
+// Repair Sorry I Heard That Wrong: independent post-write verification, pass 1.
+import { readFileSync as __rSorryRead } from "node:fs";
+{
+  const __rSorryText = __rSorryRead("/output/entry.txt", "utf8");
+  const __rSorryLines = __rSorryText.split("\n");
+  if (__rSorryLines.length > 2 || (__rSorryLines.length === 2 && __rSorryLines[1] !== "")) {
+    throw new Error("repair check: output must be exactly one line");
+  }
+  if (__rSorryText.includes("\r")) {
+    throw new Error("repair check: output must not contain a carriage return");
+  }
+}
+// Repair Sorry I Heard That Wrong: independent post-write verification, pass 2.
+{
+  const __rSorryText2 = __rSorryRead("/output/entry.txt", "utf8");
+  if (Buffer.from(__rSorryText2, "utf8").toString("utf8") !== __rSorryText2) {
+    throw new Error("repair check: output is not valid UTF-8 text");
+  }
+  const __rSorryChars = [...__rSorryText2.replace(/\n$/, "")].length;
+  if (__rSorryChars < 1 || __rSorryChars > 140) {
+    throw new Error(`repair check: ${__rSorryChars} characters, need 1-140`);
+  }
+}
